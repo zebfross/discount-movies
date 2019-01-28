@@ -1,2 +1,38 @@
-<h1>{{title}}</h1>
-<p>Welcome to {{title}}</p>
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{title}}</title>
+        <link rel="stylesheet" type="text/css" href="./node_modules/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="./node_modules/tablesort/tablesort.css" />
+    </head>
+    <body>
+        <p>Welcome to {{title}}</p>
+        <table>
+            <thead>
+                <th></th>
+                <th>Title</th>
+                <th>Rent</th>
+                <th>% Discount</th>
+                <th>Buy</th>
+                <th>% Discount</th>
+            </thead>
+            <tbody>
+            {{#movies}}
+                <tr>
+                    <td><a href="http://microsoft.com{{href}}" alt="{{title}}"><img src="https://musicimage.xboxlive.com/catalog/video.movie.{{id}}/image?locale=en-us&purposes=BoxArt&mode=crop&h=300&w=200&format=jpg" /></a></td>
+                    <td><a href="http://microsoft.com{{href}}" alt="{{title}}">{{title}}</a></td>
+                    <td>{{bestRentAsPercent prices}}</td>
+                    <td>{{bestBuyAsPercent prices}}</td>
+                </tr>
+            {{/movies}}
+            </tbody>
+        </table>
+        <footer>
+            &copy; 2018
+        </footer>
+        <script src='./node_modules/tablesort/dist/tablesort.min.js'></script>
+        <script src='./node_modules/tablesort/dist/sorts/tablesort.number.min.js'></script>
+        <script src='./node_modules/tablesort/dist/sorts/tablesort.date.min.js'></script>
+        <script type="text/javascript" src="scripts/index.js"></script>
+    </body>
+</html>

@@ -1,0 +1,1 @@
+.\HttpTrigger\start.bat

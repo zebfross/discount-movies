@@ -1,0 +1,5 @@
+# Azure functions
+site-packages
+*.exe
+*.pyd
+*.dll
