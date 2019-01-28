@@ -12,5 +12,24 @@
     "hbs": "~4.0.1",
     "http-errors": "~1.6.2",
     "morgan": "~1.9.0"
-  }
+  },
+  "description": "website for discount movies",
+  "main": "app.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zebfross/discount-movies.git"
+  },
+  "keywords": [
+    "movies",
+    "digital",
+    "deals",
+    "discounts"
+  ],
+  "author": "Zeb Fross",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/zebfross/discount-movies/issues"
+  },
+  "homepage": "https://github.com/zebfross/discount-movies#readme"
 }
