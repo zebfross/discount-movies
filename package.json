@@ -19,7 +19,9 @@
   },
   "description": "website for discount movies",
   "main": "app.js",
-  "devDependencies": {},
+  "devDependencies": {
+    "qunit": "^2.9.1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zebfross/discount-movies.git"

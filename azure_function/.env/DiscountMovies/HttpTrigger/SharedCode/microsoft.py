@@ -19,7 +19,7 @@ headers={
     ,"accept-language": "en-US,en;q=0.9" 
 }
 
-startReg = "^ReactDOM\.hydrate\(React\.createElement\(OneRF_DynamicModules\.(ButtonPanel|ProductPrice)\, "
+startReg = "^ReactDOM\.hydrate\(React\.createElement\(OneRF_DynamicModules\.(ButtonPanel|ProductPrice|DescriptionBlock)\, "
 endReg = '\)\, document\.getElementById\("react_[a-zA-Z0-9]+"\)\);'
 jsonReg = "(?P<json>.*)"
 reactReg = startReg + jsonReg + endReg
@@ -63,6 +63,12 @@ class Product:
             formatted = formatted + str(price) + " -- "
         
         return formatted
+
+    def isValid(self):
+        if not self.id or not self.title or not len(self.prices):
+            return False
+        else:
+            return True
 
     def toJsonObject(self):
         obj = {}
@@ -118,28 +124,40 @@ def parseJavascriptLine(line, product):
                 utils.log().debug(price)
             else:
                 raise Exception('no Label in action ' + action)
-    elif 'SkuDisplayData' in strippedJson:
+    elif 'SkuDisplayData' in strippedJson and strippedJson['SkuDisplayData'] != None:
         for skuNum in strippedJson['SkuDisplayData']:
             sku = strippedJson['SkuDisplayData'][skuNum]
             price = Price('Buy', sku['CurrentFormattedPrice'], sku['OriginalFormattedPrice'])
             product.addPrice(price)
             utils.log().debug(price)
-    else:
-        raise Exception("no Actions or SkuDisplayData in " + strippedJson)
 
-def requestSoup(url):
-    try:
-        request=Request(url,None,headers) #The assembled request
-        response = urlopen(request)
-        return bs(response.read().decode('utf-8', 'ignore'), "html.parser")
-    except Exception as e:
-        utils.log().exception("error getting url: " + url)
-        return ""
+    if 'ProductDisplayData' in strippedJson and 'ProductId' in strippedJson:
+        if not product.title:
+            product.title = strippedJson['ProductDisplayData']['Title']['VisibleContent']
+        if not product.id:
+            product.id = strippedJson['ProductId']
 
-def parseMoviePage(href, id, title):
+def requestSoupWithRetry(url):
+    utils.log().info('requesting url: %s', url)
+    retriesLeft = 3
+    while retriesLeft > 0:
+        try:
+            request=Request(url,None,headers) #The assembled request
+            response = urlopen(request)
+            return bs(response.read().decode('utf-8', 'ignore'), "html.parser")
+        except Exception as e:
+            utils.log().warning("error getting url (Retries left: " + str(retriesLeft) + "): " + url)
+            retriesLeft -= 1
+
+    utils.log().exception("error getting url (no retries left): " + url)
+    return None
+
+def parseMoviePage(href, id, title, insertMovie):
     url = baseUrl + href
     
-    soup = requestSoup(url)
+    soup = requestSoupWithRetry(url)
+    if not soup:
+        return None
 
     product = Product(id, href, title)
     scripts = soup.findAll('script')
@@ -153,6 +171,9 @@ def parseMoviePage(href, id, title):
             parseJavascriptLine(line, product)
 
     utils.log().info("Product completed " + str(product))
+        
+    if product.isValid():
+        insertMovie(product.toJsonObject())
 
     return product
 
@@ -160,7 +181,12 @@ def parseMoviePage(href, id, title):
 def parseMoviesPage(pageUrl, insertMovie):
     url = baseUrl + pageUrl
     try:
-        soup = requestSoup(url)
+        # this isn't a movie collection page, so treat it as a single movie page
+        if 'collection' not in url:
+            utils.log().info('url %s not a collection', pageUrl)
+            return parseMoviePage(pageUrl, '', '', insertMovie)
+            
+        soup = requestSoupWithRetry(url)
 
         #parseMoviePage(baseUrl, '/en-us/p/the-first-purge/8d6kgwxn2nk6', '8d6kgwxn2nk6')
         #parseMoviePage(baseUrl, '/en-us/p/the-nightmare-before-christmas/8d6kgwzl6186', '8d6kgwzl6186')
@@ -179,31 +205,27 @@ def parseMoviesPage(pageUrl, insertMovie):
 
             _id = ''
             title = ''
-            if not anchor.has_attr('data-m'):
-                utils.log().warning(anchor)
-            else:
-                strippedJson = parseJson(anchor['data-m'])
-                if 'pid' in strippedJson:
-                    _id = strippedJson['pid']
-                else:
-                    utils.log().warning('no product id found: ' + anchor['data-m'])
-                
-                if 'cN' in strippedJson:
-                    title = strippedJson['cN']
+            #if not anchor.has_attr('data-m'):
+            #    utils.log().warning(anchor)
+            #else:
+            #    strippedJson = parseJson(anchor['data-m'])
+            #    if 'pid' in strippedJson:
+            #        _id = strippedJson['pid']
+            #    else:
+            #        utils.log().warning('no product id found: ' + anchor['data-m'])
+            #    
+            #    if 'cN' in strippedJson:
+            #        title = strippedJson['cN']
                 
             href = anchor['href']
 
             utils.log().info("found product: " + href)
-            product = parseMoviePage(href, _id, title)
-            if product is not None:
-                insertMovie(product.toJsonObject())
-            else:
-                utils.log().warning('no product on page: %s', href)
+            parseMoviePage(href, _id, title, insertMovie)
     except Exception as e:
         utils.log().exception(e)
         
 def parseMovies(insertMovie):
-    soup = requestSoup('https://www.microsoft.com/en-us/store/movies-and-tv')
+    soup = requestSoupWithRetry('https://www.microsoft.com/en-us/store/movies-and-tv')
 
     # parse main sales
     saleLinks = soup.select('.m-feature-channel a')
@@ -216,7 +238,7 @@ def parseMovies(insertMovie):
 
     # parse flash sales - url is random, so we need to find it on the homepage
     
-    heroLinks = soup.select('.pad-multi-hero a[href*="spider"]')
+    heroLinks = soup.select('.pad-multi-hero a[href*="flash"]')
 
     if len(heroLinks) > 0:
         for link in heroLinks:

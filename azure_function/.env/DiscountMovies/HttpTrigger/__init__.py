@@ -46,6 +46,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     microsoft.parseMovies(insertMovie)
 
     #numRemoved = 0
+    #result = moviesTable.delete_many({"date_updated": {"$exists": False}})
     result = moviesTable.delete_many({"date_updated": {"$lt": newDateUpdated}})
     utils.log().info('parsing successful.  Deleted %d movies', result.deleted_count)
     return func.HttpResponse('parsing successful.  Deleted ' + str(result.deleted_count) + ' movies')

@@ -2,14 +2,13 @@
 <html>
     <head>
         <title>{{title}}</title>
-        <link rel="stylesheet" type="text/css" href="./node_modules/bootstrap/dist/css/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" href="./node_modules/tablesort/tablesort.css" />
+        <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="stylesheets/tablesort.css" />
     </head>
     <body>
         <p>Welcome to {{title}}</p>
-        <table>
+        <table id="movies-table" class="table">
             <thead>
-                <th></th>
                 <th>Title</th>
                 <th>Rent</th>
                 <th>% Discount</th>
@@ -19,10 +18,23 @@
             <tbody>
             {{#movies}}
                 <tr>
-                    <td><a href="http://microsoft.com{{href}}" alt="{{title}}"><img src="https://musicimage.xboxlive.com/catalog/video.movie.{{id}}/image?locale=en-us&purposes=BoxArt&mode=crop&h=300&w=200&format=jpg" /></a></td>
-                    <td><a href="http://microsoft.com{{href}}" alt="{{title}}">{{title}}</a></td>
-                    <td>{{bestRentAsPercent prices}}</td>
-                    <td>{{bestBuyAsPercent prices}}</td>
+                    <td class="card" style="width: 18rem;">
+                        <a href="http://microsoft.com{{href}}" alt="{{title}}" target="_blank"><img class="card-img-top" src="https://musicimage.xboxlive.com/catalog/video.movie.{{id}}/image?locale=en-us&purposes=BoxArt&mode=crop&h=300&w=200&format=jpg" caption="{{title}}" /></a>
+
+                        <div class="card-body">
+                            <a href="http://microsoft.com{{href}}" alt="{{title}}" target="_blank">
+                                <h5 class="card-title">{{title}}</h5>
+                            </a>
+                        </div>
+                    </td>
+                    <td data-sort={{formatPriceAsNumber (biggestRentDiscount prices)}}>
+                        {{formatPriceAsCurrency (biggestRentDiscount prices)}}
+                    </td>
+                    <td>{{formatPriceAsPercent (biggestRentDiscount prices)}}</td>
+                    <td data-sort={{formatPriceAsNumber (biggestBuyDiscount prices)}}>
+                        {{formatPriceAsCurrency (biggestBuyDiscount prices)}}
+                    </td>
+                    <td>{{formatPriceAsPercent (biggestBuyDiscount prices)}}</td>
                 </tr>
             {{/movies}}
             </tbody>
@@ -30,9 +42,9 @@
         <footer>
             &copy; 2018
         </footer>
-        <script src='./node_modules/tablesort/dist/tablesort.min.js'></script>
-        <script src='./node_modules/tablesort/dist/sorts/tablesort.number.min.js'></script>
-        <script src='./node_modules/tablesort/dist/sorts/tablesort.date.min.js'></script>
-        <script type="text/javascript" src="scripts/index.js"></script>
+        <script src='javascripts/tablesort/tablesort.min.js'></script>
+        <script src='javascripts/tablesort/sorts/tablesort.number.min.js'></script>
+        <script src='javascripts/tablesort/sorts/tablesort.date.min.js'></script>
+        <script type="text/javascript" src="javascripts/index.js"></script>
     </body>
 </html>

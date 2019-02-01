@@ -4,28 +4,34 @@ var router = express.Router();
 var hbs = require('hbs');
 
 function percentDiscount(price) {
-  if (price.isOnSale && price.originalAmount != 0)
+  if (price != undefined && price.isOnSale && price.originalAmount != undefined && price.originalAmount > 0)
       return 1 - (price.amount / price.originalAmount)
   return 0
 }
 
 function formatPercent(amount) {
-  if(amount != undefined && amount['amount'] != undefined)
-    return amount['amount'].toFixed(0) + "%";
-  return "";
+  if(amount != undefined)
+    return (amount * 100).toFixed(0) + "%";
+  return "-%";
 }
 
 function formatCurrency(amount) {
-  if(amount != undefined && amount['amount'] != undefined)
-    return '$' + amount['amount'].toFixed(0);
-  return "";
+  if(amount != undefined)
+    return '$' + amount.toFixed(0);
+  return "$-";
+}
+
+function formatNumber(amount) {
+  if(amount != undefined)
+    return '' + amount.toFixed(0);
+  return '0';
 }
 
 function biggestBuyDiscount(prices) {
   var discount = 0;
-  var bestPrice = {};
+  var bestPrice = undefined;
   prices.forEach((price) => {
-      if (price['priceType'].match(/Buy( )?/) && percentDiscount(price) > discount) {
+      if (price['priceType'].match(/Buy( )?/) && percentDiscount(price) >= discount) {
           discount = percentDiscount(price);
           bestPrice = price;
       }
@@ -36,13 +42,12 @@ function biggestBuyDiscount(prices) {
 
 function biggestRentDiscount(prices) {
   var discount = 0;
-  var bestPrice = {};
+  var bestPrice = undefined;
   prices.forEach((price) => {
-      if (!price['priceType'].match(/Buy( )?/) && percentDiscount(price) > discount) {
+      if (price['priceType'].match(/Rent( )?/) && percentDiscount(price) >= discount) {
           discount = percentDiscount(price);
           bestPrice = price;
       }
-
   });
 
   return bestPrice;
@@ -50,13 +55,25 @@ function biggestRentDiscount(prices) {
 
 hbs.registerHelper('percentDiscount', percentDiscount);
 hbs.registerHelper('biggestRentDiscount', biggestRentDiscount);
-
 hbs.registerHelper('biggestBuyDiscount', biggestBuyDiscount);
 
 hbs.registerHelper('formatCurrency', formatCurrency);
+hbs.registerHelper('formatPriceAsCurrency', function(price) {
+  if(price != undefined && price['amount'] != undefined)
+    return formatCurrency(price['amount']);
+  return "$-";
+});
+hbs.registerHelper('formatPriceAsPercent', function(price) {
+  if(price != undefined && price['amount'] != undefined)
+    return formatPercent(percentDiscount(price));
+  return "-%";
+});
 hbs.registerHelper('formatPercent', formatPercent);
-hbs.registerHelper('bestBuyAsPercent', function(prices) {return formatPercent(biggestBuyDiscount(prices));});
-hbs.registerHelper('bestRentAsPercent', function(prices) {return formatPercent(biggestRentDiscount(prices));});
+hbs.registerHelper('formatPriceAsNumber', function(price) {
+  if(price != undefined && price['amount'] != undefined)
+    return formatNumber(price['amount']);
+  return '0';
+});
 hbs.registerHelper('asString', function(obj) {return JSON.stringify(obj);})
 
 
