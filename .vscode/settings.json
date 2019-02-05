@@ -10,5 +10,6 @@
     "bin": true
   },
   "azureFunctions.pythonVenv": ".env",
-  "debug.internalConsoleOptions": "neverOpen"
+  "debug.internalConsoleOptions": "neverOpen",
+  "python.autoComplete.extraPaths": ["C:\\Users\\zebfross\\Documents\\projects\\discount-movies\\azure_function\\.env\\DiscountMovies\\HttpTrigger\\SharedCode"]
 }

@@ -16,14 +16,16 @@ def fail(msg, code) -> func.HttpResponse:
     utils.log().exception(msg)
     return func.HttpResponse(msg, status_code=code)
 
+def removeMoviesOlderThanDate(moviesTable, newDate):
+    result = moviesTable.delete_many({"date_updated": {"$lt": newDate}})
+    return result.deleted_count
+
+def insertOrUpdateMovie(moviesTable, movie):
+    moviesTable.update_one({"id": movie["id"]}, {'$set': movie}, True) # inserts if doesn't already exist
+
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
     utils.log().debug('received request')
-    #parseJavascriptLine('{'"InitialSkus")
-    #parseJavascriptLine('parseJavascriptLine', '')
-    #parseMoviePage('/en-us/store/p/halloween-h20-20-years-later/8d6kgwzl5f1b', '')
-    #parseMoviePage('/en-us/store/p/todd-mcfarlanes-spawn/8d6kgwzl68v1', '8d6kgwzl68v1')
-    #parseMoviePage('/en-us/store/p/quarantine-2-terminal/8d6kgwzl5r9p', '8d6kgwzl5r9p')
-    #products = parseMoviesPage('/en-us/store/movies-and-tv/collection/sales-specials/fh_store_landing_page_fc1')
 
     newDateUpdated = datetime.datetime.utcnow()
 
@@ -34,22 +36,24 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         return fail(f"Error connecting to database", 500)
     
+    moviesFound = []
     def insertMovie(movie):
         nonlocal moviesTable
+        nonlocal moviesFound
         try:
             utils.log().info("inserting/updating movie")
             movie["date_updated"] = newDateUpdated
-            moviesTable.update_one({"id": movie["id"]}, {'$set': movie}, True) # inserts if doesn't already exist
+            insertOrUpdateMovie(moviesTable, movie)
+            moviesFound.append(movie)
         except Exception as e:
             utils.log().exception("Error inserting movie into database")
 
-    microsoft.parseMovies(insertMovie)
+    microsoftScraper = microsoft.MicrosoftScraper()
+    microsoftScraper.parseMovies(insertMovie)
 
-    #numRemoved = 0
-    #result = moviesTable.delete_many({"date_updated": {"$exists": False}})
-    result = moviesTable.delete_many({"date_updated": {"$lt": newDateUpdated}})
-    utils.log().info('parsing successful.  Deleted %d movies', result.deleted_count)
-    return func.HttpResponse('parsing successful.  Deleted ' + str(result.deleted_count) + ' movies')
+    numRemoved = removeMoviesOlderThanDate(moviesTable, newDateUpdated)
+    utils.log().info('parsing successful.  Deleted %d movies', numRemoved)
+    return func.HttpResponse("parsing successful.  Deleted " + str(numRemoved) + " movies")
     
 if __name__ == "__main__":
     main(None)
