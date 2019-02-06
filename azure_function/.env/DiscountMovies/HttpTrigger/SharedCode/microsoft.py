@@ -193,29 +193,29 @@ class MicrosoftScraper:
                 
             soup = MicrosoftScraper.requestSoupWithRetry(url)
 
-            divs = soup.findAll("div", class_="m-channel-placement-item")
-            if len(divs) == 0:
-                divs = soup.findAll("section", class_="m-product-placement-item")
+            links = soup.select("div.m-channel-placement-item a")
+            if len(links) == 0:
+                links = soup.select("section.m-product-placement-item a")
 
-                if len(divs) == 0:
-                    raise Exception("no sections with class m-product-placement-item or divs with class m-channel-placement-item")
+                if len(links) == 0:
+                    links = soup.select("div.m-content-placement a")
 
-            for productDiv in divs:
-                anchor = productDiv.findNext('a')
-                if not anchor.has_attr('href'):
-                    utils.log().error(anchor)
-                    continue
-                    
-                href = anchor['href']
+                    if len(links) == 0:
+                        raise Exception("missing section.m-product-placement-item or div.m-channel-placement-item or div.m-content-placement")
 
+            for productLink in links:
+                href = productLink['href']
                 utils.log().debug("found product: " + href)
-                self.parseMoviePage(href, insertMovie)
+                if 'collection' in href:
+                    self.parseMoviesPage(href, insertMovie)
+                else:
+                    self.parseMoviePage(href, insertMovie)
         except Exception as e:
             utils.log().exception(e)
             
     def parseMovies(self, insertMovie):
         soup = MicrosoftScraper.requestSoupWithRetry(baseUrl + moviesPage)
-        linksFollowed = set()
+        self.linksScraped = set()
 
         # parse main sales
         saleLinks = soup.select('.m-feature-channel a')
@@ -224,12 +224,11 @@ class MicrosoftScraper:
             utils.log().exception('no .m-feature-channel sale links found')
         else:
             for link in saleLinks:
-                if link['href'] not in linksFollowed:
-                    self.parseMoviesPage(link['href'], insertMovie)
+                self.parseMoviesPage(link['href'], insertMovie)
 
         # parse flash sales - url is random, so we need to find it on the homepage
         
-        heroLinks = soup.select('.pad-multi-hero a[href*="flash"]')
+        heroLinks = soup.select('.pad-multi-hero a[href*="sale"]')
 
         if len(heroLinks) > 0:
             for link in heroLinks:

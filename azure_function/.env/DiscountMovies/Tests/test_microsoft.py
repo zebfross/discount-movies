@@ -19,11 +19,18 @@ moviePageHtml = """<html>
 moviesPageHtml = """<html>
 <div class="m-channel-placement-item"><a href="/test/movie"></a></div>
 <div class="m-channel-placement-item"><a href="/test/movie2"></a></div>
+<div class="m-channel-placement-item"><a href="/test/collection2/movies"></a></div>
+</html>
+"""
+moviesPage2Html = """<html>
+<div class="m-channel-placement-item"><a href="/test/movie3"></a></div>
 </html>
 """
     
 def mock_requestSoupWithRetry(url):
-    if "collection" in url:
+    if "collection2" in url:
+        return bs(moviesPage2Html, 'html.parser')
+    elif "collection" in url:
         return bs(moviesPageHtml, 'html.parser')
     elif "movies-and-tv" in url:
         return bs(homePageHtml, "html.parser")
@@ -97,7 +104,7 @@ class TestMicrosoft(unittest.TestCase):
         scraper = microsoft.MicrosoftScraper()
         scraper.parseMoviePage('/test/movie', insertMovie)
 
-        self.assertEqual(insertMovie.callCount, 1, "should have found two movies on page")
+        self.assertEqual(insertMovie.callCount, 1, "should have found one movie on page")
 
     @mock.patch('HttpTrigger.SharedCode.microsoft.MicrosoftScraper.requestSoupWithRetry', side_effect=mock_requestSoupWithRetry)
     def test_parseMoviesPage(self, mock_get):
@@ -111,7 +118,7 @@ class TestMicrosoft(unittest.TestCase):
         scraper = microsoft.MicrosoftScraper()
         scraper.parseMoviesPage('/collection/movies', insertMovie)
 
-        self.assertEqual(insertMovie.callCount, 2, "should have found two movies on page")
+        self.assertEqual(insertMovie.callCount, 3, "should have found 3 movies on page")
 
     @mock.patch('HttpTrigger.SharedCode.microsoft.MicrosoftScraper.requestSoupWithRetry', side_effect=mock_requestSoupWithRetry)
     def test_parseMovies(self, mock_get):
@@ -124,7 +131,7 @@ class TestMicrosoft(unittest.TestCase):
         scraper = microsoft.MicrosoftScraper()
         scraper.parseMovies(insertMovie)
 
-        self.assertEqual(insertMovie.callCount, 2, "should have found two movies on page")
+        self.assertEqual(insertMovie.callCount, 3, "should have found two movies on page")
 
 if __name__ == '__main__':
    unittest.main(TestMicrosoft)
