@@ -83,7 +83,8 @@ router.get('/', function(req, res, next) {
   moviesCollection.find().toArray(function(err, movies) {
     res.render('index', { 
       title: 'Discount Movies', 
-      movies: movies });
+      movies: movies,
+      flash: req.query.flash});
   });
 });
 

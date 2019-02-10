@@ -1,22 +1,36 @@
 var config = {
     debug: {
-        host: "http://localhost:3000",
+        host: "localhost:3000",
         db: "@ds028559.mlab.com:28559/discount-movies",
         db_prefix: "test_",
-        consoleLog: true
+        consoleLog: true,
+        PORT: 3000,
+        mailgun_domain: "sandbox47c93c3b2e5a409c96663306a9320d6f.mailgun.org",
+        mailgun_list: "zeb@sandbox47c93c3b2e5a409c96663306a9320d6f.mailgun.org",
+        protocol: "http"
+
     },
     production: {
-        host: "http://stocks.zebfross.com",
+        host: "movies.zebfross.com",
         db: "@ds028559.mlab.com:28559/discount-movies",
         db_prefix: "",
-        consoleLog: false
+        consoleLog: false,
+        mailgun_domain: "mg.zebfross.com",
+        mailgun_list: "",
+        protocol: "http"
     }
 }
 
 module.exports = function () {
+    var settings = config.debug
     if (process.env.ENVIRONMENT == "prod") {
-        return config.production
-    } else {
-        return config.debug
+        settings = config.production
     }
+
+    settings["MOVIES_DB_PSWD"] = process.env["MOVIES_DB_PSWD"]
+    settings["MOVIES_DB_UNAME"] = process.env["MOVIES_DB_UNAME"]
+    settings["ENVIRONMENT"] = process.env["ENVIRONMENT"]
+    settings["MAILGUN_KEY"] = process.env["MAILGUN_KEY"]
+
+    return settings
 }

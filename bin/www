@@ -3,6 +3,7 @@
 /**
  * Module dependencies.
  */
+require('dotenv').config()
 
 var app = require('../app');
 var db = require('../db');
@@ -10,13 +11,11 @@ var config = require('../config')();
 var debug = require('debug')('discount-movies:server');
 var http = require('http');
 
-require('dotenv').config()
-
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(config.PORT);
 app.set('port', port);
 
 /**
@@ -29,10 +28,7 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-var username = process.env.MOVIES_DB_UNAME;
-var password = process.env.MOVIES_DB_PSWD;
-
-db.connect('mongodb://' + username + ':' + password + config.db, function(err) {
+db.connect('mongodb://' + config.MOVIES_DB_UNAME + ':' + config.MOVIES_DB_PSWD + config.db, function(err) {
   if (err) {
     console.log('Unable to connect to Mongo.')
     process.exit(1)

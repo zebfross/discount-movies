@@ -1,50 +1,40 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>{{title}}</title>
-        <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" href="stylesheets/tablesort.css" />
-    </head>
-    <body>
-        <p>Welcome to {{title}}</p>
-        <table id="movies-table" class="table">
-            <thead>
-                <th>Title</th>
-                <th>Rent</th>
-                <th>% Discount</th>
-                <th>Buy</th>
-                <th>% Discount</th>
-            </thead>
-            <tbody>
-            {{#movies}}
-                <tr>
-                    <td class="card" style="width: 18rem;">
-                        <a href="http://microsoft.com{{href}}" alt="{{title}}" target="_blank"><img class="card-img-top" src="https://musicimage.xboxlive.com/catalog/video.movie.{{id}}/image?locale=en-us&purposes=BoxArt&mode=crop&h=300&w=200&format=jpg" caption="{{title}}" /></a>
+<p>Welcome to {{title}} {{> subscribe}}</p>
+<table id="movies-table" class="table">
+    <thead>
+        <th>Title</th>
+        <th>Rent</th>
+        <th>% Discount</th>
+        <th>Buy</th>
+        <th>% Discount</th>
+    </thead>
+    <tbody>
+    {{#movies}}
+        <tr>
+            <td class="card" style="width: 18rem;">
+                <a href="http://microsoft.com{{href}}" alt="{{title}}" target="_blank"><img class="card-img-top" src="https://musicimage.xboxlive.com/catalog/video.movie.{{id}}/image?locale=en-us&purposes=BoxArt&mode=crop&h=300&w=200&format=jpg" caption="{{title}}" /></a>
 
-                        <div class="card-body">
-                            <a href="http://microsoft.com{{href}}" alt="{{title}}" target="_blank">
-                                <h5 class="card-title">{{title}}</h5>
-                            </a>
-                        </div>
-                    </td>
-                    <td data-sort={{formatPriceAsNumber (biggestRentDiscount prices)}}>
-                        {{formatPriceAsCurrency (biggestRentDiscount prices)}}
-                    </td>
-                    <td>{{formatPriceAsPercent (biggestRentDiscount prices)}}</td>
-                    <td data-sort={{formatPriceAsNumber (biggestBuyDiscount prices)}}>
-                        {{formatPriceAsCurrency (biggestBuyDiscount prices)}}
-                    </td>
-                    <td>{{formatPriceAsPercent (biggestBuyDiscount prices)}}</td>
-                </tr>
-            {{/movies}}
-            </tbody>
-        </table>
-        <footer>
-            &copy; 2018
-        </footer>
-        <script src='javascripts/tablesort/tablesort.min.js'></script>
-        <script src='javascripts/tablesort/sorts/tablesort.number.min.js'></script>
-        <script src='javascripts/tablesort/sorts/tablesort.date.min.js'></script>
-        <script type="text/javascript" src="javascripts/index.js"></script>
-    </body>
-</html>
+                <div class="card-body">
+                    <a href="http://microsoft.com{{href}}" alt="{{title}}" target="_blank">
+                        <h5 class="card-title">{{title}}</h5>
+                    </a>
+                </div>
+            </td>
+            <td data-sort={{formatPriceAsNumber (biggestRentDiscount prices)}}>
+                {{formatPriceAsCurrency (biggestRentDiscount prices)}}
+            </td>
+            <td>{{formatPriceAsPercent (biggestRentDiscount prices)}}</td>
+            <td data-sort={{formatPriceAsNumber (biggestBuyDiscount prices)}}>
+                {{formatPriceAsCurrency (biggestBuyDiscount prices)}}
+            </td>
+            <td>{{formatPriceAsPercent (biggestBuyDiscount prices)}}</td>
+        </tr>
+    {{/movies}}
+    </tbody>
+</table>
+<footer>
+    &copy; 2018
+</footer>
+<script src='javascripts/tablesort/tablesort.min.js'></script>
+<script src='javascripts/tablesort/sorts/tablesort.number.min.js'></script>
+<script src='javascripts/tablesort/sorts/tablesort.date.min.js'></script>
+<script type="text/javascript" src="javascripts/index.js"></script>
