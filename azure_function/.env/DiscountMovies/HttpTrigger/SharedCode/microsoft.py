@@ -183,7 +183,6 @@ class MicrosoftScraper:
         if pageUrl in self.linksScraped:
             return None
 
-        self.linksScraped.add(pageUrl)
         url = baseUrl + pageUrl
         try:
             # this isn't a movie collection page, so treat it as a single movie page
@@ -191,6 +190,7 @@ class MicrosoftScraper:
                 utils.log().info('url %s not a collection', pageUrl)
                 return self.parseMoviePage(pageUrl, insertMovie)
                 
+            self.linksScraped.add(pageUrl)
             soup = MicrosoftScraper.requestSoupWithRetry(url)
 
             links = soup.select("div.m-channel-placement-item a")
@@ -218,20 +218,10 @@ class MicrosoftScraper:
         self.linksScraped = set()
 
         # parse main sales
-        saleLinks = soup.select('.m-feature-channel a')
+        saleLinks = soup.select('.m-content-placement-item a')
         
         if len(saleLinks) == 0:
-            utils.log().exception('no .m-feature-channel sale links found')
+            utils.log().exception('no .m-content-placement-item sale links found')
         else:
             for link in saleLinks:
                 self.parseMoviesPage(link['href'], insertMovie)
-
-        # parse flash sales - url is random, so we need to find it on the homepage
-        
-        heroLinks = soup.select('.pad-multi-hero a[href*="sale"]')
-
-        if len(heroLinks) > 0:
-            for link in heroLinks:
-                self.parseMoviesPage(link['href'], insertMovie)
-        else:
-            utils.log().info('did not find flash sale')

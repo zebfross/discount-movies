@@ -8,8 +8,8 @@ lineStart = 'ReactDOM.hydrate(React.createElement(OneRF_DynamicModules.ButtonPan
 lineEnd = '), document.getElementById("react_abc"));'
 testJson = '{"Actions":[{"Label":{"IncludePrice":true,"LabelPrefix":"Rent ","OriginalPrice":"$7.99","CurrentPrice":"$0.99"}}],"ProductDisplayData":{"Title":{"VisibleContent":"Test Title"}},"ProductId":"123"}'
 homePageHtml = """<html>
-    <div class="m-feature-channel"><a href="/collection/movies"></a></div>
-    <div class="m-feature-channel"><a href="/test/movie"></a></div>
+    <div class="m-content-placement-item"><a href="/collection/movies"></a></div>
+    <div class="m-content-placement-item"><a href="/test/movie"></a></div>
 </html>
 """
 moviePageHtml = """<html>
@@ -103,6 +103,20 @@ class TestMicrosoft(unittest.TestCase):
 
         scraper = microsoft.MicrosoftScraper()
         scraper.parseMoviePage('/test/movie', insertMovie)
+
+        self.assertEqual(insertMovie.callCount, 1, "should have found one movie on page")
+
+    @mock.patch('HttpTrigger.SharedCode.microsoft.MicrosoftScraper.requestSoupWithRetry', side_effect=mock_requestSoupWithRetry)
+    def test_parseMoviesPage_WithSingleProductPage(self, mock_get):
+
+        def insertMovie(movie):
+            insertMovie.callCount += 1
+            self.assertTrue(movie != None, 'movie should not be None')
+
+        insertMovie.callCount = 0
+
+        scraper = microsoft.MicrosoftScraper()
+        scraper.parseMoviesPage('/test/movie', insertMovie)
 
         self.assertEqual(insertMovie.callCount, 1, "should have found one movie on page")
 
