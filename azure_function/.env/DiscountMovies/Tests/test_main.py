@@ -12,5 +12,9 @@ class TestMain(unittest.TestCase):
     def test_main(self, mock_purge, mockInsert, mockParse):
         HttpTrigger.main(None)
 
+    def test_databaseConnection(self):
+        db = HttpTrigger.connectToDatabase()
+        self.assertIsNotNone(db, "Database should have connected")
+
 if __name__ == '__main__':
    unittest.main(TestMain)

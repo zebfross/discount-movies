@@ -12,14 +12,20 @@ module.exports = function(grunt) {
               cmd: ".\\env\\Scripts\\activate && func host start",
               cwd: "C:\\Users\\zebfross\\Documents\\projects\\discount-movies\\azure_function\\.env\\DiscountMovies"
           }
+      },
+      env: {
+          dev : {
+              src : ".env"
+          }
       }
     });
 
     grunt.loadNpmTasks('grunt-exec');
+    grunt.loadNpmTasks('grunt-env');
   
     // Register the default tasks.
-    grunt.registerTask('default', ['watch']);
-    grunt.registerTask('test', ['exec:testpy'])
+    grunt.registerTask('test', ['env:dev', 'exec:testpy'])
     grunt.registerTask('run', 'exec:runpy')
+    grunt.registerTask('default', ['run']);
     
   };
